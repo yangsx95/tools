@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -59,7 +60,8 @@
             font-size: 0.8rem;
         }
 
-        .table th, .table td {
+        .table th,
+        .table td {
             padding: 8px;
             text-align: center;
             border: 1px solid #ccc;
@@ -74,9 +76,9 @@
             text-align: left;
             font-weight: bold;
         }
-
     </style>
 </head>
+
 <body>
 <div class="container">
     <h2>饮食计算器</h2>
@@ -91,20 +93,43 @@
 
     <div class="input-group">
         <label for="height">身高（厘米）：</label>
-        <input type="number" id="height" placeholder="请输入身高">
+        <input type="number" id="height" placeholder="请输入身高" oninput="refreshBMI()">
     </div>
 
     <div class="input-group">
         <label for="weight">体重（千克）：</label>
-        <input type="number" id="weight" placeholder="请输入体重">
+        <input type="number" id="weight" placeholder="请输入体重" oninput="refreshBMI()">
     </div>
 
     <div class="input-group">
         <label for="target">目标（增肌/减脂）：</label>
-        <select id="target">
+        <select id="target" onchange="targetChanged(this.value)">
             <option value="strong" selected>增肌</option>
             <option value="slim">减脂</option>
         </select>
+    </div>
+
+    <div class="input-group" id="slimStageBox" hidden>
+        <label for="slimStage">减脂阶段（初期/末期）：</label>
+        <select id="slimStage" onchange="refreshCgkgAndPgkg()">
+            <option value="initial" selected>初期</option>
+            <option value="late">末期</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="cgkg">碳水每千克体重数（克）：</label>
+        <input type="number" id="cgkg" placeholder="请输入碳水每千克体重数" max="0" min="0" disabled="disabled">
+    </div>
+
+    <div class="input-group">
+        <label for="pgkg">蛋白质每千克体重数（克）：</label>
+        <input type="number" id="pgkg" placeholder="请输入蛋白质每千克体重数" max="0" min="0" disabled="disabled">
+    </div>
+
+    <div class="input-group">
+        <label for="fgkg">脂肪每千克体重数（克）：</label>
+        <input type="number" id="fgkg" placeholder="请输入身高和体重以及你的目标" max="0" min="0" disabled="disabled">
     </div>
 
     <div class="input-group">
@@ -118,176 +143,254 @@
         </select>
     </div>
 
-    <button onclick="calculate()">查看结果</button>
+    <button onclick="calculate()">生成结果</button>
 
     <div id="warn"></div>
 
+    <p>你的BMI为 <b id="bmi"></b></p>
     <div id="result" class="result">
+
     </div>
 </div>
 
 <script>
+    function refreshBMI() {
+        let weightValue = document.getElementById('weight').value;
+        let heightValue = document.getElementById('height').value;
+        let bmiValue = calculateBMI(weightValue, heightValue);
+        document.getElementById("bmi").innerText = bmiValue;
+        if (bmiValue) {
+            document.getElementById("cgkg").removeAttribute("disabled");
+            document.getElementById("pgkg").removeAttribute("disabled");
+            document.getElementById("fgkg").removeAttribute("disabled");
+            // 根据输入，计算碳水、蛋白质，每日摄入量的最大值、最小值
+
+        } else {
+            document.getElementById("cgkg").setAttribute("disabled", "disabled");
+            document.getElementById("pgkg").setAttribute("disabled", "disabled");
+            document.getElementById("fgkg").setAttribute("disabled", "disabled");
+        }
+
+        refreshCgkgAndPgkg();
+    }
+
+    function targetChanged(target) {
+        if (target === 'strong') {
+            document.getElementById('slimStageBox').setAttribute('hidden', 'hidden');
+        } else {
+            document.getElementById('slimStageBox').removeAttribute('hidden');
+        }
+        refreshCgkgAndPgkg();
+    }
+
+    function refreshCgkgAndPgkg() {
+        if (!(document.getElementById("bmi").innerText)) {
+            return;
+        }
+
+        let sex = document.getElementById('sex').value;
+        let target = document.getElementById('target').value;
+        let slimStage = document.getElementById('slimStage').value;
+
+        let data = {}
+        data[['strong', 'male'].join('-')] = {
+            c: {
+                start: 4,
+                end: 5,
+            },
+            p: {
+                start: 1.5,
+                end: 2,
+            },
+            f: {
+                start: 1,
+                end: 1,
+            },
+        };
+        data[['strong', 'female'].join('-')] = {
+            c: {
+                start: 3,
+                end: 4,
+            },
+            p: {
+                start: 1.5,
+                end: 1.5,
+            },
+            f: {
+                start: 1,
+                end: 1,
+            },
+        };
+        data[['slim', 'male', 'initial'].join('-')] = {
+            c: {
+                start: 3,
+                end: 3.5,
+            },
+            p: {
+                start: 1.5,
+                end: 2,
+            },
+            f: {
+                start: 0.8,
+                end: 0.8,
+            },
+        };
+        data[['slim', 'male', 'late'].join('-')] = {
+            c: {
+                start: 2,
+                end: 2.5,
+            },
+            p: {
+                start: 1.5,
+                end: 2,
+            },
+            f: {
+                start: 0.8,
+                end: 0.8,
+            },
+        };
+        data[['slim', 'female', 'initial'].join('-')] = {
+            c: {
+                start: 2.5,
+                end: 3,
+            },
+            p: {
+                start: 1.5,
+                end: 1.5,
+            },
+            f: {
+                start: 0.8,
+                end: 0.8,
+            },
+        };
+        data[['slim', 'female', 'late'].join('-')] = {
+            c: {
+                start: 1.5,
+                end: 2,
+            },
+            p: {
+                start: 1.5,
+                end: 1.5,
+            },
+            f: {
+                start: 0.8,
+                end: 0.8,
+            },
+        };
+
+        let cpfRange;
+        if (target === 'strong') {
+            cpfRange = data[target + '-' + sex];
+        } else {
+            cpfRange = data[target + '-' + sex + '-' + slimStage];
+        }
+        document.getElementById("cgkg").setAttribute('placeholder', `你的碳水建议范围是${cpfRange.c.start}-${cpfRange.c.end}g`);
+        document.getElementById("pgkg").setAttribute('placeholder', `你的蛋白质建议范围是${cpfRange.p.start}-${cpfRange.p.end}g`);
+        document.getElementById("fgkg").setAttribute('placeholder', `你的脂肪建议范围是${cpfRange.f.start}-${cpfRange.f.end}g`);
+
+    }
+
     function calculateBMI(weight, height) {
+        if (!weight || !height) {
+            return '';
+        }
         return (weight / ((height / 100) * (height / 100))).toFixed(2);
     }
 
-    function calculateCarBohydratePerKg(sex, target, stage) {
-        let data = {}
-        data[['strong', 'male', '初期'].join('-')] = ['4-5g', '1.5-2g', '1g']
-        data[['strong', 'male', '末期'].join('-')] = ['4-5g', '1.5-2g', '1g']
-        data[['strong', 'female', '初期'].join('-')] = ['3-4g', '1.5g', '1g']
-        data[['strong', 'female', '末期'].join('-')] = ['3-4g', '1.5g', '1g']
-        data[['slim', 'male', '初期'].join('-')] = ['3-3.5g', '1.5-2g', '0.8g']
-        data[['slim', 'male', '末期'].join('-')] = ['2-2.5g', '1.5-2g', '0.8g']
-        data[['slim', 'female', '初期'].join('-')] = ['2.5-3g', '1.5g', '0.8g']
-        data[['slim', 'female', '末期'].join('-')] = ['1.5-2g', '1.5g', '0.8g']
-        return data[[target, sex, stage].join('-')];
-    }
-
-    function calculateCarBohydratePerDay(sex, target, stage, weight) {
-        let perKgData = calculateCarBohydratePerKg(sex, target, stage);
-        let c = parseStartAndEndGStringNumber(perKgData[0])
-        let p = parseStartAndEndGStringNumber(perKgData[1])
-        let f = parseStartAndEndGStringNumber(perKgData[2])
-
-        return [
-            generateResultPerDayNumber(c[0], c[1], weight),
-            generateResultPerDayNumber(p[0], p[1], weight),
-            generateResultPerDayNumber(f[0], f[1], weight)
-        ]
-    }
-
-    function parseStartAndEndGStringNumber(str) {
-        str = str.replace(/g$/, '');
-        if (!str.includes("-")) {
-            return [str, str]
-        }
-        return str.split("-")
-    }
-
-    function generateResultPerDayNumber(startNumber, endNumber, weight) {
-        if (startNumber === endNumber) {
-            return (startNumber * weight).toFixed(2) + 'g'
-        }
-
-        return (startNumber * weight).toFixed(2) + '-' + (endNumber * weight).toFixed(2) + 'g'
-    }
-
-    function calculatePerKgRest(sex, target, stage) {
-        let perKgData = calculateCarBohydratePerKg(sex, target, stage);
-        if (target === 'strong') {
-            perKgData[0] = '2.5-3g';
-        } else {
-            perKgData[0] = '1.5-2g';
-        }
-        return perKgData;
-    }
-
-    function calculateOneDayAllocation(time, perDay) {
-        let pd = parseStartAndEndGStringNumber(perDay[0]);
-        let p20 = (pd[0] * 0.2).toFixed(2) + (pd ? ('-' + (pd[1] * 0.2).toFixed(2)) : '') + 'g';
-        let p40 = (pd[0] * 0.4).toFixed(2) + (pd ? ('-' + (pd[1] * 0.4).toFixed(2)) : '') + 'g';
+    function calculateOneDayAllocation(time, cv) {
+        let cvP20 = (cv * 0.2).toFixed(2);
+        let cvP40 = (cv * 0.4).toFixed(2);
 
         switch (time) {
             case '早饭后':
                 return [{
                     no: '早饭(练前餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '练后餐',
-                    cCount: '40% 约' + p40,
+                    cCount: '40% 约' + cvP40,
                     pCount: '30-50g',
                     fCount: '20g内'
-                },{
+                }, {
                     no: '午饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '晚饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
                 }];
             case '午饭前':
                 return [{
                     no: '早饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '练前餐',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '可吃可不吃',
                     fCount: '不吃'
-                },{
+                }, {
                     no: '午饭(练后餐)',
-                    cCount: '40% 约' + p40,
+                    cCount: '40% 约' + cvP40,
                     pCount: '30-50g',
                     fCount: '20g内'
-                },{
+                }, {
                     no: '晚饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
                 }];
             case '晚饭前':
                 return [{
                     no: '早饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '午饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '练前餐',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '可吃可不吃',
                     fCount: '不吃'
-                },{
+                }, {
                     no: '晚饭(其他餐)',
-                    cCount: '40% 约' + p40,
+                    cCount: '40% 约' + cvP40,
                     pCount: '30-50g',
                     fCount: '20g内'
                 }];
             case '晚饭后':
                 return [{
                     no: '早饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '午饭(其他餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '晚饭(练前餐)',
-                    cCount: '20% 约' + p20,
+                    cCount: '20% 约' + cvP20,
                     pCount: '不严格',
                     fCount: '不严格'
-                },{
+                }, {
                     no: '练后餐',
-                    cCount: '40% 约' + p40,
+                    cCount: '40% 约' + cvP40,
                     pCount: '30-50g',
                     fCount: '20g内'
                 },];
         }
-    }
-
-    function calculatePerDayRest(perKgRest, weight) {
-        let c = parseStartAndEndGStringNumber(perKgRest[0]);
-        c = generateResultPerDayNumber(c[0], c[1], weight);
-        let p = parseStartAndEndGStringNumber(perKgRest[1]);
-        p = generateResultPerDayNumber(p[0], p[1], weight);
-        let f = parseStartAndEndGStringNumber(perKgRest[2]);
-        f = generateResultPerDayNumber(f[0], f[1], weight);
-        return [c, p, f];
     }
 
     function calculate() {
@@ -299,11 +402,13 @@
         result.innerHTML = '';
 
         // 获取所有的输入值
-        let sex = document.getElementById('sex').value;
+        let time = document.getElementById('time').value;
         let height = parseFloat(document.getElementById('height').value);
         let weight = parseFloat(document.getElementById('weight').value);
-        let target = document.getElementById('target').value;
-        let time = document.getElementById('time').value;
+        let cgkg = parseFloat(document.getElementById('cgkg').value);
+        let pgkg = parseFloat(document.getElementById('pgkg').value);
+        let fgkg = parseFloat(document.getElementById('fgkg').value);
+
 
         // 校验身高体重
         if (isNaN(height) || isNaN(weight)) {
@@ -311,134 +416,73 @@
             return;
         }
 
-        let bmi = calculateBMI(weight, height);
-        let perKgStart = calculateCarBohydratePerKg(sex, target, '初期');
-        let perKgEnd = calculateCarBohydratePerKg(sex, target, '末期');
-        let perDayStart = calculateCarBohydratePerDay(sex, target, '初期', weight);
-        let perDayEnd = calculateCarBohydratePerDay(sex, target, '末期', weight);
-        let perKgRest = calculatePerKgRest(sex, target, '初期');
-        let perDayRest = calculatePerDayRest(perKgRest, weight);
+        // 校验碳蛋脂的量
+        if (isNaN(cgkg) || isNaN(pgkg) || isNaN(fgkg)) {
+            warn.innerHTML = '请输入有效的碳蛋脂的量';
+            return;
+        }
 
-        let oneDayAllocation = calculateOneDayAllocation(time, perDayStart, perDayEnd);
+        let oneDayAllocation = calculateOneDayAllocation(time, (cgkg * weight).toFixed(2));
 
-        let resultHTML = `<p>你的BMI为： ${bmi}</p>`;
+        let resultHTML = ``;
+        // 碳蛋脂的量
 
+        // 生成日内分配
         resultHTML += `
-        <br/>
-        <p>训练日碳蛋脂日摄入计算</p>
-        <table class="table">
-            <thead>
-            <tr>
-                <th></th>
-                <th>碳水化合物</th>
-                <th>蛋白质</th>
-                <th>脂肪</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>g/kg（初期）</th>
-                <td>${perKgStart[0]}</td>
-                <td>${perKgStart[1]}</td>
-                <td>${perKgStart[2]}</td>
-            </tr>
-            <tr>
-                <th>g/kg（末期）</th>
-                <td>${perKgEnd[0]}</td>
-                <td>${perKgEnd[1]}</td>
-                <td>${perKgEnd[2]}</td>
-            </tr>
-            <tr>
-                <th>g/day（初期）</th>
-                <td>${perDayStart[0]}</td>
-                <td>${perDayStart[1]}</td>
-                <td>${perDayStart[2]}</td>
-            </tr>
-            <tr>
-                <th>g/day（末期）</th>
-                <td>${perDayEnd[0]}</td>
-                <td>${perDayEnd[1]}</td>
-                <td>${perDayEnd[2]}</td>
-            </tr>
-            </tbody>
-        </table>
-        `;
-
-        // 生成训练日日内分配
-        resultHTML += `
-        <br/>
-        <p>训练日日内分配</p>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>餐次</th>
-                <th>碳水化合物</th>
-                <th>蛋白质</th>
-                <th>脂肪</th>
-            </tr>
-            </thead>
-            <tbody id="dayCount">
+            <br/>
+            <p>碳蛋脂及其日内分配</p>
+            <table class="table">
+                <thead>
                 <tr>
-                    <th>${oneDayAllocation[0].no}</th>
-                    <td>${oneDayAllocation[0].cCount}</td>
-                    <td>${oneDayAllocation[0].pCount}</td>
-                    <td>${oneDayAllocation[0].fCount}</td>
+                    <th></th>
+                    <th>碳水化合物</th>
+                    <th>蛋白质</th>
+                    <th>脂肪</th>
                 </tr>
-                <tr>
-                    <th>${oneDayAllocation[1].no}</th>
-                    <td>${oneDayAllocation[1].cCount}</td>
-                    <td>${oneDayAllocation[1].pCount}</td>
-                    <td>${oneDayAllocation[1].fCount}</td>
-                </tr>
-                <tr>
-                    <th>${oneDayAllocation[2].no}</th>
-                    <td>${oneDayAllocation[2].cCount}</td>
-                    <td>${oneDayAllocation[2].pCount}</td>
-                    <td>${oneDayAllocation[2].fCount}</td>
-                </tr>
-                <tr>
-                    <th>${oneDayAllocation[3].no}</th>
-                    <td>${oneDayAllocation[3].cCount}</td>
-                    <td>${oneDayAllocation[3].pCount}</td>
-                    <td>${oneDayAllocation[3].fCount}</td>
-                </tr>
-            </tbody>
-        </table>
-        `;
-        resultHTML += `
-        <br/>
-        <p>休息日碳蛋脂日摄入计算</p>
-        <table class="table">
-            <thead>
-            <tr>
-                <th></th>
-                <th>碳水化合物</th>
-                <th>蛋白质</th>
-                <th>脂肪</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>g/kg</th>
-                <td>${perKgRest[0]}</td>
-                <td>${perKgRest[1]}</td>
-                <td>${perKgRest[2]}</td>
-            </tr>
-            <tr>
-                <th>g/day</th>
-                <td>${perDayRest[0]}</td>
-                <td>${perDayRest[1]}</td>
-                <td>${perDayRest[2]}</td>
-            </tr>
-            <tr>
-                <th>备注</th>
-                <td colspan="3">碳水总量减少，且每餐均餐，去除练后的大碳水</td>
-            </tr>
-            </tbody>
-        </table>
-        `;
+                </thead>
+                <tbody id="dayCount">
+                    <tr>
+                        <th>每公斤体重碳蛋脂</th>
+                        <td>${cgkg}g</td>
+                        <td>${pgkg}g</td>
+                        <td>${fgkg}g</td>
+                    </tr>
+                    <tr>
+                        <th>全天碳蛋脂</th>
+                        <td>${(cgkg * weight).toFixed(2)}g</td>
+                        <td>${(pgkg * weight).toFixed(2)}g</td>
+                        <td>${(fgkg * weight).toFixed(2)}g</td>
+                    </tr>
+                    <tr>
+                        <th>${oneDayAllocation[0].no}</th>
+                        <td>${oneDayAllocation[0].cCount}</td>
+                        <td>${oneDayAllocation[0].pCount}</td>
+                        <td>${oneDayAllocation[0].fCount}</td>
+                    </tr>
+                    <tr>
+                        <th>${oneDayAllocation[1].no}</th>
+                        <td>${oneDayAllocation[1].cCount}</td>
+                        <td>${oneDayAllocation[1].pCount}</td>
+                        <td>${oneDayAllocation[1].fCount}</td>
+                    </tr>
+                    <tr>
+                        <th>${oneDayAllocation[2].no}</th>
+                        <td>${oneDayAllocation[2].cCount}</td>
+                        <td>${oneDayAllocation[2].pCount}</td>
+                        <td>${oneDayAllocation[2].fCount}</td>
+                    </tr>
+                    <tr>
+                        <th>${oneDayAllocation[3].no}</th>
+                        <td>${oneDayAllocation[3].cCount}</td>
+                        <td>${oneDayAllocation[3].pCount}</td>
+                        <td>${oneDayAllocation[3].fCount}</td>
+                    </tr>
+                </tbody>
+            </table>
+            `;
         document.getElementById('result').innerHTML = resultHTML;
     }
 </script>
 </body>
+
 </html>
