@@ -184,6 +184,14 @@
     }
 
     function refreshCgkgAndPgkg() {
+        let cgkgInput = document.getElementById("cgkg");
+        let pgkgInput = document.getElementById("pgkg");
+        let fgkgInput = document.getElementById("fgkg");
+
+        cgkgInput.value = null;
+        pgkgInput.value = null;
+        fgkgInput.value = null;
+
         if (!(document.getElementById("bmi").innerText)) {
             return;
         }
@@ -284,9 +292,9 @@
         } else {
             cpfRange = data[target + '-' + sex + '-' + slimStage];
         }
-        document.getElementById("cgkg").setAttribute('placeholder', `你的碳水建议范围是${cpfRange.c.start}-${cpfRange.c.end}g`);
-        document.getElementById("pgkg").setAttribute('placeholder', `你的蛋白质建议范围是${cpfRange.p.start}-${cpfRange.p.end}g`);
-        document.getElementById("fgkg").setAttribute('placeholder', `你的脂肪建议范围是${cpfRange.f.start}-${cpfRange.f.end}g`);
+        cgkgInput.setAttribute('placeholder', `你的碳水建议范围是${cpfRange.c.start}-${cpfRange.c.end}g`);
+        pgkgInput.setAttribute('placeholder', `你的蛋白质建议范围是${cpfRange.p.start}-${cpfRange.p.end}g`);
+        fgkgInput.setAttribute('placeholder', `你的脂肪建议范围是${cpfRange.f.start}-${cpfRange.f.end}g`);
 
     }
 
