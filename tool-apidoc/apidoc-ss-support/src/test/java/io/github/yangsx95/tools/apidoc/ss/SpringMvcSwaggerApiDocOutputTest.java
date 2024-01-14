@@ -19,11 +19,7 @@ class SpringMvcSwaggerApiDocOutputTest {
 
     @Test
     void output() {
-        SpringMvcSwaggerApiCollector collector = new SpringMvcSwaggerApiCollector();
-        List<ApiInfo> collect = collector.collect(new JavaReflectMethodsCollectorSource(Arrays.stream(SpringMvcSwaggerApiParserTest.BClass.class.getMethods()).collect(Collectors.toSet())));
-
-        SpringMvcSwaggerApiDocOutput output = new SpringMvcSwaggerApiDocOutput();
-        System.out.println(output.output(collect));
+        System.out.println(MdKiller.of().table().data(new Object[]{"1", "2"}, new Object[][]{{"1", "2"}}).endTable().build().toString());
     }
 
 }

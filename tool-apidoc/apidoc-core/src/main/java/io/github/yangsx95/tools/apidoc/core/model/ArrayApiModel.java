@@ -14,7 +14,7 @@ public class ArrayApiModel extends AbstractApiModel{
 
     @Override
     public String name() {
-        return "array";
+        return "array<" + elementApiModel.name() + ">";
     }
 
     @Override

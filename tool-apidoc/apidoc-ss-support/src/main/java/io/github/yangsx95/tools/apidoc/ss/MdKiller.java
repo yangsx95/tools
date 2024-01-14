@@ -362,15 +362,15 @@ public class MdKiller {
                     StringJoiner titles = new StringJoiner(" | "), extras = new StringJoiner(" | ");
                     for (Object t : tableData[0]) {
                         titles.add(t != null ? t.toString() : "");
-                        extras.add("-");
+                        extras.add("---");
                     }
-                    latestData.append("\n\n").append(titles).append('\n').append(extras);
+                    latestData.append("\n\n").append("| ").append(titles).append(" |").append('\n').append("| ").append(extras).append(" |");
                     for (int i = 1; i < tableData.length; i++) {
                         StringJoiner dataJoiner = new StringJoiner(" | ");
                         for (int j = 0; j < tableData[i].length; j++) {
                             dataJoiner.add(tableData[i][j] != null ? tableData[i][j].toString() : "");
                         }
-                        latestData.append('\n').append(dataJoiner);
+                        latestData.append('\n').append("| ").append(dataJoiner).append(" |");
                     }
                 }
             }
@@ -557,7 +557,7 @@ public class MdKiller {
         }
 
         public SectionBuilder bigTitle(String title) {
-            if (title != null && !title.isBlank()) {
+            if (title != null && !title.isEmpty()) {
                 curSec.addChild(new Section(Section.Type.BIG_TITLE, new MetaData(Fonts.of(title)), curSec,
                         null, curSec.getDepth()));
             }
@@ -569,7 +569,7 @@ public class MdKiller {
         }
 
         public SectionBuilder title(String title, Style color) {
-            if (title != null && !title.isBlank()) {
+            if (title != null && !title.isEmpty()) {
                 curSec.addChild(new Section(Section.Type.TITLE, new MetaData(Fonts.of(title, color)),
                         curSec, null, curSec.getDepth()));
             }
@@ -581,7 +581,7 @@ public class MdKiller {
         }
 
         public SectionBuilder title(String title, Style titleColor, Fonts... label) {
-            if (title != null && !title.isBlank()) {
+            if (title != null && !title.isEmpty()) {
                 if (titleColor == null) {
                     titleColor = Style.NORMAL;
                 }
@@ -593,7 +593,7 @@ public class MdKiller {
         }
 
         public SectionBuilder subTitle(String title) {
-            if (title != null && !title.isBlank()) {
+            if (title != null && !title.isEmpty()) {
                 curSec.addChild(new Section(Section.Type.SUBTITLE, new MetaData(Fonts.of(title)),
                         curSec, null, curSec.getDepth()));
             }
@@ -619,10 +619,10 @@ public class MdKiller {
         }
 
         public SectionBuilder link(String name, String url) {
-            if (name == null || name.isBlank()) {
+            if (name == null || name.isEmpty()) {
                 name = url;
             }
-            if (url != null && !url.isBlank()) {
+            if (url != null && !url.isEmpty()) {
                 MetaData links = new MetaData(MetaData.Type.LINK, Fonts.of(name),
                         Collections.singletonList(Fonts.of(url)));
                 curSec.addChild(new Section(Section.Type.NORMAL, links, curSec, null, curSec.getDepth()));
@@ -643,7 +643,7 @@ public class MdKiller {
                     serialUrlInfos.add(Fonts.of(key != null ? key : ""));
                     serialUrlInfos.add(Fonts.of(value != null ? value : ""));
                 }
-                Fonts wrappedName = name != null && !name.isBlank() ? Fonts.of(name) : Fonts.EMPTY;
+                Fonts wrappedName = name != null && !name.isEmpty() ? Fonts.of(name) : Fonts.EMPTY;
                 MetaData linksGroup = new MetaData(MetaData.Type.LINK_LIST, wrappedName, serialUrlInfos);
                 curSec.addChild(new Section(Section.Type.NORMAL, linksGroup, curSec, null, curSec.getDepth()));
             }

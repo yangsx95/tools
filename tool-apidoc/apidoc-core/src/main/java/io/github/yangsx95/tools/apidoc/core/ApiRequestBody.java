@@ -6,5 +6,20 @@ import io.github.yangsx95.tools.apidoc.core.model.AbstractApiModel;
  * @author yangshunxiang
  * @since 2024/1/10
  */
-public record ApiRequestBody(String contentType, AbstractApiModel modelType) {
+public class ApiRequestBody {
+    private final String contentType;
+    private final AbstractApiModel modelType;
+
+    public ApiRequestBody(String contentType, AbstractApiModel modelType) {
+        this.contentType = contentType;
+        this.modelType = modelType;
+    }
+
+    public String contentType() {
+        return contentType;
+    }
+
+    public AbstractApiModel modelType() {
+        return modelType;
+    }
 }

@@ -8,12 +8,40 @@ import java.lang.reflect.Field;
  */
 public interface ApiModelInfoSupply {
 
-    record ApiModelBasicInfo(String name, String chineseName) {
+    class ApiModelBasicInfo {
+        private final String name;
+        private final String chineseName;
 
+        public ApiModelBasicInfo(String name, String chineseName) {
+            this.name = name;
+            this.chineseName = chineseName;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public String chineseName() {
+            return chineseName;
+        }
     }
 
-    record ApiModelPropertyBasicInfo(String name, String chineseName) {
+    class ApiModelPropertyBasicInfo {
+        private final String name;
+        private final String chineseName;
 
+        public ApiModelPropertyBasicInfo(String name, String chineseName) {
+            this.name = name;
+            this.chineseName = chineseName;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public String chineseName() {
+            return chineseName;
+        }
     }
 
     ApiModelBasicInfo getModelInfo(Class<?> clazz);

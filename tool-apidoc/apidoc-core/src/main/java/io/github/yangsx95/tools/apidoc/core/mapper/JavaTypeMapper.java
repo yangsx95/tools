@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  * @author yangshunxiang
  * @since 2024/1/11
  */
+@SuppressWarnings("unchecked")
 public class JavaTypeMapper {
 
     public AbstractApiModel map(Type type, ApiModelInfoSupply supply, Type ownerObjectType) {
@@ -21,7 +22,8 @@ public class JavaTypeMapper {
         }
 
         // 如果type没有泛型
-        if (type instanceof Class<?> clazz) {
+        if (type instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) type;
             if (CharSequence.class.isAssignableFrom(clazz)) {
                 return new StringApiModel();
             } else if (Number.class.isAssignableFrom(clazz)
@@ -31,12 +33,16 @@ public class JavaTypeMapper {
                     || float.class == clazz
                     || double.class == clazz) {
                 return new NumberApiModel();
+            } else if (Date.class == clazz) {
+                return new DateApiModel();
             } else if (clazz.isArray()) {
                 return new ArrayApiModel(map(clazz.getComponentType(), supply, type));
+            } else if (clazz.isEnum()) {
+                return new EnumApiModel();
             }
             // 如果是Bean就对该对象进行解析
             else if (BeanUtil.isBean(clazz)) {
-                List<ObjectApiModel.Property> properties = getObjectProperties(clazz.getDeclaredFields(), supply, type);
+                List<ObjectApiModel.Property> properties = getObjectProperties(clazz, supply, type);
                 ApiModelInfoSupply.ApiModelBasicInfo info = supply.getModelInfo(clazz);
                 return new ObjectApiModel(info.name(), info.chineseName(), properties);
             }
@@ -51,7 +57,7 @@ public class JavaTypeMapper {
             }
             // 不是集合类型，就是带有泛型的对象类型
             else {
-                List<ObjectApiModel.Property> properties = getObjectProperties(clazz.getDeclaredFields(), supply, type);
+                List<ObjectApiModel.Property> properties = getObjectProperties(clazz, supply, type);
                 ApiModelInfoSupply.ApiModelBasicInfo info = supply.getModelInfo(clazz);
                 return new ObjectApiModel(info.name(), info.chineseName(), properties);
             }
@@ -67,17 +73,23 @@ public class JavaTypeMapper {
                 }
             }
             // 实际处理的是真实的类型
-            return map(((ParameterizedType) ownerObjectType).getActualTypeArguments()[idx], supply, null);
+            // 如果ownerType为class，说明泛型类没有写泛型，就他的泛型就是Object，给一个空的object
+            if (ownerObjectType instanceof Class<?>) {
+                return new ObjectApiModel("object", "对象", Collections.emptyList());
+            } else if (ownerObjectType instanceof ParameterizedType) {
+                return map(((ParameterizedType) ownerObjectType).getActualTypeArguments()[idx], supply, null);
+            }
         }
         return null;
     }
 
-    private List<ObjectApiModel.Property> getObjectProperties(Field[] clazz, ApiModelInfoSupply supply, Type type) {
-        return Arrays.stream(clazz).map(f ->
-                new ObjectApiModel.Property(
+    private List<ObjectApiModel.Property> getObjectProperties(Class<?> clazz, ApiModelInfoSupply supply, Type type) {
+        return Arrays.stream(clazz.getDeclaredFields())
+                .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                .map(f -> new ObjectApiModel.Property(
                         supply.getModelPropertyInfo(f).name(),
                         map(f.getGenericType(), supply, type),
                         supply.getModelPropertyInfo(f).chineseName())
-        ).collect(Collectors.toList());
+                ).collect(Collectors.toList());
     }
 }

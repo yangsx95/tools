@@ -10,6 +10,7 @@ import org.springframework.util.Assert;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,10 +56,13 @@ public class SpringMvcSwaggerApiParser {
     }
 
     public static ApiRequestBody parseApiRequestBodyFromMethod(Method m, SpringMvcSwaggerCollectContext context) {
-        Parameter parameter = SpringMvcSwaggerUtil.getRequestBodyParameterOnMethod(m);
+        Parameter parameter = Optional.ofNullable(SpringMvcSwaggerUtil.getRequestBodyParameterOnMethod(m))
+                .flatMap(p -> Arrays.stream(m.getParameters()).findFirst())
+                .orElse(null);
         if (Objects.isNull(parameter)) {
             return null;
         }
+
         JavaTypeMapper javaTypeMapper = new JavaTypeMapper();
         AbstractApiModel model = javaTypeMapper.map(
                 parameter.getParameterizedType(),

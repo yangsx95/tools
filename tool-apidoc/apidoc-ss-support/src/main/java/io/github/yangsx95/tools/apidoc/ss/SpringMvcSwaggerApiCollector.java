@@ -33,6 +33,6 @@ public class SpringMvcSwaggerApiCollector implements Collector<JavaReflectMethod
             ApiOperation opr = SpringMvcSwaggerApiParser.parseApiOperationFromMethod(m, context);
             ApiBaseInfo apiBaseInfo = SpringMvcSwaggerApiParser.parseApiBaseInfoFromMethod(m, context);
             return new ApiInfo(apiBaseInfo, opr);
-        }).toList();
+        }).collect(Collectors.toList());
     }
 }

@@ -1,8 +1,6 @@
 package io.github.yangsx95.tools.apidoc.core.model;
 
 import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * @author yangshunxiang
@@ -45,6 +43,28 @@ public class ObjectApiModel extends AbstractApiModel {
         return properties;
     }
 
-    public record Property(String propertyName, AbstractApiModel model, String propertyChineseName) {
+    public static class Property {
+        private final String propertyName;
+        private final AbstractApiModel model;
+        private final String propertyChineseName;
+
+        public Property(String propertyName, AbstractApiModel model, String propertyChineseName) {
+
+            this.propertyName = propertyName;
+            this.model = model;
+            this.propertyChineseName = propertyChineseName;
+        }
+
+        public String propertyName() {
+            return propertyName;
+        }
+
+        public AbstractApiModel model() {
+            return model;
+        }
+
+        public String propertyChineseName() {
+            return propertyChineseName;
+        }
     }
 }
