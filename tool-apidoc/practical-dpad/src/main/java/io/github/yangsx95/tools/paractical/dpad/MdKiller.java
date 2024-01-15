@@ -1,4 +1,4 @@
-package io.github.yangsx95.tools.apidoc.ss;
+package io.github.yangsx95.tools.paractical.dpad;
 
 import java.util.*;
 
@@ -336,7 +336,7 @@ public class MdKiller {
 
         private StringBuilder parseUnOrderListSection(StringBuilder latestData) {
             char[] chars = latestData.toString().toCharArray();
-            if (chars.length <= 0) {
+            if (chars.length == 0) {
                 return latestData;
             }
             StringBuilder data = new StringBuilder(chars.length * 2);
