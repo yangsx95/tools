@@ -76,6 +76,11 @@ class SpringMvcSwaggerApiParserTest {
             return null;
         }
 
+        @PostMapping("b10Method")
+        @ApiOperation("B类第10个方法")
+        public R b10Method(@RequestBody Person person) {
+            return null;
+        }
         @ApiModel("人")
         public static class Person {
             @ApiModelProperty("姓名")
@@ -218,6 +223,12 @@ class SpringMvcSwaggerApiParserTest {
     @Test
     void parseApiOperationFromMethod() throws NoSuchMethodException {
         io.github.yangsx95.tools.apidoc.core.ApiOperation apiOperation = SpringMvcSwaggerApiParser.parseApiOperationFromMethod(BClass.class.getMethod("b9Method", BClass.Person.class), new SpringMvcSwaggerCollectContext());
+        System.out.println(apiOperation);
+    }
+
+    @Test
+    void parseApiOperationFromMethod2() throws NoSuchMethodException {
+        io.github.yangsx95.tools.apidoc.core.ApiOperation apiOperation = SpringMvcSwaggerApiParser.parseApiOperationFromMethod(BClass.class.getMethod("b10Method", BClass.Person.class), new SpringMvcSwaggerCollectContext());
         System.out.println(apiOperation);
 
     }

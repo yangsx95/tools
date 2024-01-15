@@ -20,10 +20,6 @@ public class ObjectApiModel extends AbstractApiModel {
         this.properties = propertiesApiModels;
     }
 
-    public ObjectApiModel(List<Property> properties) {
-        this("object", "对象", properties);
-    }
-
     @Override
     public String name() {
         return name;

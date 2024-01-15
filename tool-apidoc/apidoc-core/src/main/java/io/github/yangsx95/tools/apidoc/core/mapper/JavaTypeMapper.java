@@ -33,12 +33,18 @@ public class JavaTypeMapper {
                     || float.class == clazz
                     || double.class == clazz) {
                 return new NumberApiModel();
+            } else if (Boolean.class == clazz || boolean.class == clazz) {
+                return new BooleanApiModel();
             } else if (Date.class == clazz) {
                 return new DateApiModel();
             } else if (clazz.isArray()) {
                 return new ArrayApiModel(map(clazz.getComponentType(), supply, type));
             } else if (clazz.isEnum()) {
                 return new EnumApiModel();
+            } else if (clazz == Object.class) {
+                return new AnyApiModel();
+            } else if (clazz == Void.class || clazz == void.class) {
+                return new NullApiModel();
             }
             // 如果是Bean就对该对象进行解析
             else if (BeanUtil.isBean(clazz)) {
