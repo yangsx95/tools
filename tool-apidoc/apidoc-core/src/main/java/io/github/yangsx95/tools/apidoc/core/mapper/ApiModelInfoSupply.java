@@ -1,6 +1,6 @@
 package io.github.yangsx95.tools.apidoc.core.mapper;
 
-import java.lang.reflect.Field;
+import io.github.yangsx95.tools.apidoc.core.util.BeanProperty;
 
 /**
  * @author yangshunxiang
@@ -46,5 +46,5 @@ public interface ApiModelInfoSupply {
 
     ApiModelBasicInfo getModelInfo(Class<?> clazz);
 
-    ApiModelPropertyBasicInfo getModelPropertyInfo(Field field);
+    ApiModelPropertyBasicInfo getModelPropertyInfo(BeanProperty beanProperty);
 }

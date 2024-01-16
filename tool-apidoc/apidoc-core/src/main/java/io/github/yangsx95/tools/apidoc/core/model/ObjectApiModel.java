@@ -1,5 +1,6 @@
 package io.github.yangsx95.tools.apidoc.core.model;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**

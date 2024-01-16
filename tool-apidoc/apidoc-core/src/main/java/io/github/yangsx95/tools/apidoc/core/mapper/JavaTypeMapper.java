@@ -1,9 +1,12 @@
 package io.github.yangsx95.tools.apidoc.core.mapper;
 
-import cn.hutool.core.bean.BeanUtil;
 import io.github.yangsx95.tools.apidoc.core.model.*;
+import io.github.yangsx95.tools.apidoc.core.util.ReflectUtil;
 
-import java.lang.reflect.*;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +50,7 @@ public class JavaTypeMapper {
                 return new NullApiModel();
             }
             // 如果是Bean就对该对象进行解析
-            else if (BeanUtil.isBean(clazz)) {
+            else if (ReflectUtil.hasGetter(clazz)) {
                 List<ObjectApiModel.Property> properties = getObjectProperties(clazz, supply, type);
                 ApiModelInfoSupply.ApiModelBasicInfo info = supply.getModelInfo(clazz);
                 return new ObjectApiModel(info.name(), info.chineseName(), properties);
@@ -90,12 +93,16 @@ public class JavaTypeMapper {
     }
 
     private List<ObjectApiModel.Property> getObjectProperties(Class<?> clazz, ApiModelInfoSupply supply, Type type) {
-        return Arrays.stream(clazz.getDeclaredFields())
-                .filter(f -> !Modifier.isStatic(f.getModifiers()))
-                .map(f -> new ObjectApiModel.Property(
-                        supply.getModelPropertyInfo(f).name(),
-                        map(f.getGenericType(), supply, type),
-                        supply.getModelPropertyInfo(f).chineseName())
+        return ReflectUtil.getBeanProperties(clazz)
+                .stream()
+                .map(p -> {
+                            ApiModelInfoSupply.ApiModelPropertyBasicInfo propertyInfo = supply.getModelPropertyInfo(p);
+                            return new ObjectApiModel.Property(
+                                    propertyInfo.name(),
+                                    map(p.getGenericType(), supply, type),
+                                    supply.getModelPropertyInfo(p).chineseName()
+                            );
+                        }
                 ).collect(Collectors.toList());
     }
 }

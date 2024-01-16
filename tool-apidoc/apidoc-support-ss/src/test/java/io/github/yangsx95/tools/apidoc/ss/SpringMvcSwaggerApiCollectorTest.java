@@ -21,4 +21,5 @@ public class SpringMvcSwaggerApiCollectorTest {
         List<ApiInfo> collect = collector.collect(new JavaReflectMethodsCollectorSource(Arrays.stream(SpringMvcSwaggerApiParserTest.BClass.class.getMethods()).collect(Collectors.toSet())));
         System.out.println(collect);
     }
+
 }

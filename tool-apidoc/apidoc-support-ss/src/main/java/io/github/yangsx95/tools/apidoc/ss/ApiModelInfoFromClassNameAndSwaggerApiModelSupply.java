@@ -1,6 +1,7 @@
 package io.github.yangsx95.tools.apidoc.ss;
 
 import io.github.yangsx95.tools.apidoc.core.mapper.ApiModelInfoSupply;
+import io.github.yangsx95.tools.apidoc.core.util.BeanProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -29,15 +30,23 @@ public class ApiModelInfoFromClassNameAndSwaggerApiModelSupply implements ApiMod
     }
 
     @Override
-    public ApiModelPropertyBasicInfo getModelPropertyInfo(Field field) {
-        ApiModelProperty[] properties = field.getAnnotationsByType(ApiModelProperty.class);
-        String chineseName;
-        if (properties.length == 0) {
-            chineseName = field.getName();
-        } else {
-            chineseName = properties[0].value();
+    public ApiModelPropertyBasicInfo getModelPropertyInfo(BeanProperty beanProperty) {
+        // 先从getter中取
+        ApiModelProperty[] annos = new ApiModelProperty[0];
+        if (Objects.nonNull(beanProperty.getter())) {
+            annos = beanProperty.getter().getAnnotationsByType(ApiModelProperty.class);
         }
 
-        return new ApiModelPropertyBasicInfo(field.getName(), chineseName);
+        if (Objects.nonNull(beanProperty.field()) &&  annos.length == 0) {
+            annos = beanProperty.field().getAnnotationsByType(ApiModelProperty.class);
+        }
+
+        String propertyName = beanProperty.propertyName();
+        String chineseName = propertyName;
+        if (annos.length > 0) {
+            chineseName = annos[0].value();
+        }
+
+        return new ApiModelPropertyBasicInfo(propertyName, chineseName);
     }
 }
