@@ -1,5 +1,11 @@
 # tool-apidoc
 
+`tool-apidoc` 工具使用java8编写，他会收集Java代码中的方法信息，并生成API信息，目前针对
+
+- Spring5 + Swagger
+
+进行支持。
+
 ## Change History
 
 - 1.0-SNAPSHOT
