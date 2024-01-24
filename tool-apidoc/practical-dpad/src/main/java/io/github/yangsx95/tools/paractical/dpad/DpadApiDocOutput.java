@@ -34,8 +34,8 @@ public class DpadApiDocOutput implements ApiDocOutput {
                         .text("请求方式：" + CollectionUtil.join( apiInfo.apiOperation().httpMethods(), ",") + "  ")
                         .text("使用场景：  ")
                 ;
-                AbstractApiModel requestModel = operation.apiRequestBody().modelType();
-                if (Objects.nonNull(requestModel)) {
+                if (Objects.nonNull(operation.apiRequestBody()) && Objects.nonNull(operation.apiRequestBody().modelType())) {
+                    AbstractApiModel requestModel = operation.apiRequestBody().modelType();
                     Set<String> cache = new HashSet<>();
                     // 请求体是一个简单类型
                     if (requestModel.simpleTypeModel()) {
@@ -50,16 +50,16 @@ public class DpadApiDocOutput implements ApiDocOutput {
                     }
                 }
 
-                AbstractApiModel responseModel = operation.apiResponseBody().modelType();
-                if (Objects.nonNull(responseModel)) {
+                if (Objects.nonNull(operation.apiResponseBody()) && Objects.nonNull(operation.apiResponseBody().modelType())) {
+                    AbstractApiModel responseModel = operation.apiResponseBody().modelType();
                     Set<String> cache = new HashSet<>();
                     // 响应体是一个简单类型
                     if (responseModel.simpleTypeModel()) {
                         builder.table()
-                                .data(new Object[]{"参数名", "参数类型", "必填", "描述", "是否在用"}, new Object[][]{{"请求体", requestModel.name(), "是", requestModel.chineseName(), "是"}})
+                                .data(new Object[]{"参数名", "参数类型", "必填", "描述", "是否在用"}, new Object[][]{{"请求体", responseModel.name(), "是", responseModel.chineseName(), "是"}})
                                 .endTable();
                     }
-                    // 请求体是一个数组，暂时不考虑
+                    // 响应体是一个数组，暂时不考虑
                     else if (responseModel instanceof ArrayApiModel) {
                     } else if (responseModel instanceof ObjectApiModel) {
                         writeTable(responseModel, builder, true, false, cache);
