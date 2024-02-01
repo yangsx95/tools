@@ -38,7 +38,7 @@ public class ReflectUtil {
 
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            if (isGetterMethod(method) && !"getClass".equals(method.getName())) {
+            if (isGetterMethod(method)) {
                 return true;
             }
         }
@@ -47,6 +47,7 @@ public class ReflectUtil {
 
     public static boolean isGetterMethod(Method method) {
         return method.getName().startsWith("get")
+                && method.getName().length() > 3
                 && !Modifier.isStatic(method.getModifiers())
                 && method.getParameterCount() == 0
                 && method.getReturnType() != void.class
