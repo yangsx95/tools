@@ -1,12 +1,10 @@
 package io.github.yangsx95.tools.apidoc.core.util;
 
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ArrayUtil;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ReflectUtil {
@@ -66,14 +64,11 @@ public class ReflectUtil {
         }
 
         // 获取所有的字段
-        Field[] fields = getFieldsDirectly(clazz, true);
-        if (fields.length == 0) {
+        Map<String, Field> fieldMap  = getFieldsDirectly(clazz, true)
+                .stream()
+                .collect(Collectors.toMap(Field::getName, Function.identity(), (field, field2) -> field));
+        if (fieldMap.isEmpty()) {
             return Collections.emptyList();
-        }
-
-        Map<String, Field> fieldMap = new HashMap<>();
-        for (Field field : fields) {
-            fieldMap.put(field.getName(), field);
         }
 
         return Arrays.stream(clazz.getMethods())
@@ -82,17 +77,11 @@ public class ReflectUtil {
                 .collect(Collectors.toList());
     }
 
-    public static Field[] getFieldsDirectly(Class<?> beanClass, boolean withSuperClassFields) throws SecurityException {
-        Assert.notNull(beanClass);
-        Field[] allFields = null;
+    public static List<Field> getFieldsDirectly(Class<?> beanClass, boolean withSuperClassFields) throws SecurityException {
+        List<Field> allFields = new ArrayList<>();
 
         for (Class<?> searchType = beanClass; searchType != null; searchType = withSuperClassFields ? searchType.getSuperclass() : null) {
-            Field[] declaredFields = searchType.getDeclaredFields();
-            if (null == allFields) {
-                allFields = declaredFields;
-            } else {
-                allFields = ArrayUtil.append(allFields, declaredFields);
-            }
+            allFields.addAll(Arrays.stream(searchType.getDeclaredFields()).collect(Collectors.toList()));
         }
 
         return allFields;
