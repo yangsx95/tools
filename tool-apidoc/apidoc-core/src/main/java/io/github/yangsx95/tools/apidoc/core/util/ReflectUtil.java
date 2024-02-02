@@ -71,7 +71,7 @@ public class ReflectUtil {
                     String fieldName = getFieldNameFromGetterMethod(m);
                     Field field;
                     try {
-                        field = clazz.getField(fieldName);
+                        field = clazz.getDeclaredField(fieldName);
                     } catch (NoSuchFieldException ignored) {
                         field = null;
                     }
