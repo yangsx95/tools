@@ -56,7 +56,7 @@ public class DpadApiDocOutput implements ApiDocOutput {
                     // 响应体是一个简单类型
                     if (responseModel.simpleTypeModel()) {
                         builder.table()
-                                .data(new Object[]{"参数名", "参数类型", "必填", "描述", "是否在用"}, new Object[][]{{"请求体", responseModel.name(), "是", responseModel.chineseName(), "是"}})
+                                .data(new Object[]{"参数名", "参数类型", "空指针描述", "描述", "是否在用"}, new Object[][]{{"请求体", responseModel.name(), "是", responseModel.chineseName(), "是"}})
                                 .endTable();
                     }
                     // 响应体是一个数组，暂时不考虑
@@ -100,7 +100,7 @@ public class DpadApiDocOutput implements ApiDocOutput {
             }
 
             builder.table()
-                    .data(new Object[]{"参数名", "字段类型", "必填", "描述", "是否在用"}, data)
+                    .data(new Object[]{"参数名", "字段类型", isReq ? "必填" : "空指针描述", "描述", "是否在用"}, data)
                     .endTable();
 
             ps.stream().filter(property -> !property.model().simpleTypeModel())

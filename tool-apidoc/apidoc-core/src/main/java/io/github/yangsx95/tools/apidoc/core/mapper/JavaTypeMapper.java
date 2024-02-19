@@ -35,7 +35,7 @@ public class JavaTypeMapper {
                     || short.class == clazz
                     || float.class == clazz
                     || double.class == clazz) {
-                return new NumberApiModel();
+                return new NumberApiModel(clazz.getSimpleName(), "数字");
             } else if (Boolean.class == clazz || boolean.class == clazz) {
                 return new BooleanApiModel();
             } else if (Date.class == clazz) {

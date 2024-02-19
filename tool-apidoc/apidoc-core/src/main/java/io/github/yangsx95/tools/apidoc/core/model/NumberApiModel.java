@@ -6,14 +6,28 @@ package io.github.yangsx95.tools.apidoc.core.model;
  */
 public class NumberApiModel extends AbstractApiModel {
 
+    private final String name;
+
+    private final String chineseName;
+
+    public NumberApiModel() {
+        this.name = "number";
+        this.chineseName = "数字";
+    }
+
+    public NumberApiModel(String name, String chineseName) {
+        this.name = name;
+        this.chineseName = chineseName;
+    }
+
     @Override
     public String name() {
-        return "number";
+        return this.name;
     }
 
     @Override
     public String chineseName() {
-        return "数字";
+        return this.chineseName;
     }
 
     @Override
